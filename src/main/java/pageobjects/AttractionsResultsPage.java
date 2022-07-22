@@ -15,66 +15,66 @@ import java.util.stream.Collectors;
 
 public class AttractionsResultsPage extends BasePage {
 
+    public static final By RESULTS_SHOWING = By.xpath("//span[contains(text(),'Showing')]");
+    public static final By RESULTS_QUANTITY = By.xpath("//h2[contains(text(),'results')]");
+    public static final By PRICE = By.xpath("//a[@data-testid='card']//div[contains(text(),'From')]/following-sibling::div");
+    public static final By FILTER_BY_PRICE = By.xpath("//*[@name = 'filter_by_price']/following-sibling::label");
+
     public AttractionsResultsPage(WebDriver driver) {
         super(driver);
     }
 
     public AttractionsResultsPage setFirstFilterByPrice() {
-        var filter = getFirstFilterByPrice();
-        filter.click();
-
+        getFirstFilterByPrice().click();
         return this;
     }
 
     public String getFirstFilterByPriceText() {
-        var filter = getFirstFilterByPrice();
-
-        return filter.getText();
+        return getFirstFilterByPrice().getText();
     }
 
     public int getFirstFilterByPriceExpectedQuantity() {
-        var filter = getFirstFilterByPriceText();
-        var filterQuantityString = filter.substring(filter.indexOf("(") + 1, filter.indexOf(")"));
+        String filter = getFirstFilterByPriceText();
+        String filterQuantityString = filter.substring(filter.indexOf("(") + 1, filter.indexOf(")"));
 
         return Integer.parseInt(filterQuantityString);
     }
 
-    public Double getFirstFilterByPricePriceFrom() {
-        var filter = getFirstFilterByPriceText().split("\n")[0];
-        var priceFromString = filter.substring(filter.indexOf(" "), filter.indexOf("-")).trim();
+    public double getFirstFilterByPricePriceFrom() {
+        String filter = getFirstFilterByPriceText().split("\n")[0];
+        String priceFromString = filter.substring(filter.indexOf(" "), filter.indexOf("-")).trim();
 
        return Double.parseDouble(priceFromString);
     }
 
-    public Double getFirstFilterByPricePriceTo() {
-        var filter = getFirstFilterByPriceText().split("\n")[0];
-        var priceToString = filter.substring(filter.lastIndexOf(" ")).trim();
+    public double getFirstFilterByPricePriceTo() {
+        String filter = getFirstFilterByPriceText().split("\n")[0];
+        String priceToString = filter.substring(filter.lastIndexOf(" ")).trim();
 
         return Double.parseDouble(priceToString);
     }
 
     public int getResultsQuantity() {
-        var showingText = driver.findElement(By.xpath("//span[contains(text(),'Showing')]")).getText();
-        var quantityString = showingText.substring(showingText.indexOf("of") + 3);
+        String showingText = driver.findElement(RESULTS_SHOWING).getText();
+        String quantityString = showingText.substring(showingText.indexOf("of") + 3);
 
         return Integer.parseInt(quantityString);
     }
 
     public boolean waitForResultsQuantity() {
         WebElement results = new WebDriverWait(driver, Duration.ofSeconds(10)).until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath("//h2[contains(text(),'results')]")));
+                ExpectedConditions.visibilityOfElementLocated(RESULTS_QUANTITY));
 
         return Objects.nonNull(results);
     }
 
     public List<Double> getResultsPrices() {
-        var prices = driver.findElements(By.xpath("//a[@data-testid='card']//div[contains(text(),'From')]/following-sibling::div"));
+        List<WebElement> prices = driver.findElements(PRICE);
 
         if (prices.size() == 0) {
             return new ArrayList<>();
         } else {
-            var pricesString = prices // collect prices as strings
+            List<String> pricesString = prices // collect prices as strings
                     .stream()
                     .map(WebElement::getText)
                     .filter(Predicate.not(String::isBlank))
@@ -90,7 +90,7 @@ public class AttractionsResultsPage extends BasePage {
     }
 
     private WebElement getFirstFilterByPrice() {
-        var filtersByPrice = driver.findElements(By.xpath("//*[@name = 'filter_by_price']/following-sibling::label"));
+        List<WebElement> filtersByPrice = driver.findElements(FILTER_BY_PRICE);
         return filtersByPrice.get(0);
     }
 }

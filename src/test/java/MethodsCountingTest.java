@@ -24,7 +24,7 @@ public class MethodsCountingTest {
             throw new RuntimeException("Failed to delete file " + targetFilePath, e);
         }
 
-        var methods = BookingTest.class.getMethods();
+        Method[] methods = BookingTest.class.getMethods();
         List<Method> methodsTest = new ArrayList<>();
         for (Method method : methods) {
             if (method.getAnnotation(Test.class) != null) {
@@ -44,6 +44,7 @@ public class MethodsCountingTest {
         }
 
         assertThat(targetFilePath)
+                .as("File with methods names should exist with path: " + targetFilePath)
                 .exists();
     }
 }

@@ -9,6 +9,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 
 import static java.lang.String.format;
 import static java.time.format.DateTimeFormatter.ofPattern;
@@ -16,65 +17,70 @@ import static java.util.Locale.US;
 
 public class MainPage extends BasePage {
 
+    public static final By SEARCH_FIELD = By.xpath("//input[@type='search']");
+    public static final By DATES = By.className("xp__dates-inner");
+    public static final By CALENDAR_FORWARD_BUTTON = By.xpath("//div[@data-bui-ref='calendar-next']");
+    public static final By CALENDAR_MONTH = By.className("bui-calendar__month");
+    public static final By SEARCH_BUTTON = By.className("sb-searchbox__button");
+    public static final By ATTRACTIONS_LINK = By.xpath("//a[@data-decider-header='attractions']");
+    public static final String DATE_XPATH = "//td[@data-date = '%s']";
+
     public MainPage(WebDriver driver) {
         super(driver);
     }
 
     public MainPage enterCityName(String cityName) {
-        WebElement searchField = driver.findElement(By.xpath("//input[@type='search']"));
-        searchField.sendKeys(cityName);
+        driver.findElement(SEARCH_FIELD).sendKeys(cityName);
         return this;
     }
 
     public MainPage chooseDates(LocalDate startDate, LocalDate endDate) {
 
-        WebElement datesField = driver.findElement(By.className("xp__dates-inner"));
+        driver.findElement(DATES).click();
 
-        datesField.click();
+        WebElement monthElement = getMonth(startDate);
+        clickDate(startDate, monthElement);
 
-        WebElement forwardButton = driver.findElement(By.xpath("//div[@data-bui-ref='calendar-next']"));
-
-        var formatter = ofPattern("MMMM yyyy", US);
-        var monthStart = YearMonth.of(startDate.getYear(), startDate.getMonth());
-
-        YearMonth currentMonth;
-        WebElement calendarMonth;
-        Boolean moveForward = false;
-        do {
-            calendarMonth = new WebDriverWait(driver, Duration.ofSeconds(10))
-                    .until(ExpectedConditions.visibilityOfElementLocated(
-                            By.className("bui-calendar__month")));
-            currentMonth = YearMonth.parse(calendarMonth.getText(), formatter);
-            moveForward = currentMonth.isBefore(monthStart);
-            if (moveForward) {
-                forwardButton.click();
-            }
-        } while (moveForward);
-
-        clickDate(startDate, calendarMonth);
-        clickDate(endDate, calendarMonth);
+        monthElement = getMonth(endDate);
+        clickDate(endDate, monthElement);
 
         return this;
     }
 
     public StaysResultsPage executeSearch() {
-        WebElement searchButton = driver.findElement(By.className("sb-searchbox__button"));
-        searchButton.click();
+        driver.findElement(SEARCH_BUTTON).click();
         return new StaysResultsPage(driver);
     }
 
     public AttractionsPage openAttractionsPage() {
-        var attractions = driver.findElement(By.xpath("//a[@data-decider-header='attractions']"));
-        attractions.click();
-
+        driver.findElement(ATTRACTIONS_LINK).click();
         return new AttractionsPage(driver);
     }
 
+    private WebElement getMonth(LocalDate startDate) {
+        DateTimeFormatter formatter = ofPattern("MMMM yyyy", US);
+        YearMonth monthStart = YearMonth.of(startDate.getYear(), startDate.getMonth());
+
+        WebElement monthElement;
+        boolean moveForward;
+        do {
+            monthElement = new WebDriverWait(driver, Duration.ofSeconds(10))
+                    .until(ExpectedConditions.visibilityOfElementLocated(CALENDAR_MONTH));
+
+            moveForward = YearMonth.parse(monthElement.getText(), formatter)
+                    .isBefore(monthStart);
+
+            if (moveForward) {
+                driver.findElement(CALENDAR_FORWARD_BUTTON).click();
+            }
+        } while (moveForward);
+
+        return monthElement;
+    }
+
     private void clickDate(LocalDate date, WebElement calendarMonth) {
-        String dateXPath = "//td[@data-date = '%s']";
         String stringDate = date.format(ofPattern("yyyy-MM-dd"));
-        var currentDateXPath = format(dateXPath, stringDate);
-        var currentDate = calendarMonth.findElement(By.xpath(currentDateXPath));
-        currentDate.click();
+        String currentDateXPath = format(DATE_XPATH, stringDate);
+        calendarMonth.findElement(By.xpath(currentDateXPath)).click();
     }
 }

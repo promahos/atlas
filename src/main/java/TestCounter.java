@@ -6,7 +6,6 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
@@ -19,15 +18,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class TestCounter {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         String testClassesDirectory = "target/test-classes";
-        URL testClassesURL;
-        try {
-            testClassesURL = Paths.get(testClassesDirectory).toUri().toURL();
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("Failed to find project directory for test classes: " + testClassesDirectory, e);
-        }
+        URL testClassesURL = Paths.get(testClassesDirectory).toUri().toURL();
 
         List<URL> testClassesURLs = new ArrayList<>();
         testClassesURLs.add(testClassesURL);
@@ -50,10 +44,6 @@ public class TestCounter {
                 .collect(Collectors.joining(", "));
 
         Path targetFilePath = Paths.get("results", "testMethodsNamesAll.txt");
-        try {
-            Files.write(targetFilePath, methodsNames.getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to write file " + targetFilePath, e);
-        }
+        Files.write(targetFilePath, methodsNames.getBytes(StandardCharsets.UTF_8));
     }
 }

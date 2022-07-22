@@ -7,6 +7,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.internal.ConstructorOrMethod;
+import pageobjects.AttractionsPage;
 import pageobjects.AttractionsResultsPage;
 import pageobjects.MainPage;
 import pageobjects.StaysResultsPage;
@@ -18,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -42,6 +44,7 @@ public class BookingTest {
         driver.manage().timeouts().implicitlyWait(ofSeconds(100));
         driver.manage().window().maximize();
 
+        // Optional task, one of implementations
         var testMethods = context.getAllTestMethods();
         String methodsNames = Arrays.stream(testMethods)
                 .filter(b -> b.getRealClass() == this.getClass())
@@ -54,6 +57,12 @@ public class BookingTest {
         } catch (IOException e) {
             throw new RuntimeException("Failed to write file " + targetFilePath, e);
         }
+    }
+
+    @AfterClass
+    public void tearDown() {
+        driver.close();
+        driver.quit();
     }
 
     @Test
@@ -77,19 +86,19 @@ public class BookingTest {
 
         // Verify
         // City
-        var addresses = resultsPage.getAddresses();
+        List<String> addresses = resultsPage.getAddresses();
         assertThat(addresses)
                 .as("All addresses should contain chosen city")
                 .isNotEmpty()
                 .allMatch(e -> e.contains(city));
 
         // Dates
-        var resultsStartDate = resultsPage.getStartDate();
+        LocalDate resultsStartDate = resultsPage.getStartDate();
         assertThat(resultsStartDate)
                 .as("Start date on results page should be equal to chosen value")
                 .isEqualTo(startDate);
 
-        var resultsEndDate = resultsPage.getEndDate();
+        LocalDate resultsEndDate = resultsPage.getEndDate();
         assertThat(resultsEndDate)
                 .as("End date on results page should be equal to chosen value")
                 .isEqualTo(endDate);
@@ -103,7 +112,7 @@ public class BookingTest {
         MainPage mainPage = new MainPage(driver);
 
         // 2. Go to attractions page
-        var attractionsPage = mainPage.openAttractionsPage();
+        AttractionsPage attractionsPage = mainPage.openAttractionsPage();
 
         // 3. Choose city
         String city = "New York";
@@ -114,35 +123,31 @@ public class BookingTest {
         // 4. Search
         AttractionsResultsPage resultsPage = attractionsPage.clickSearch();
 
-        var totalQuantity = resultsPage.getResultsQuantity();
+        int totalQuantity = resultsPage.getResultsQuantity();
 
         // 5. Find price filter, pick first value, remember it, set filter
-        var priceFrom = resultsPage.getFirstFilterByPricePriceFrom();
-        var priceTo = resultsPage.getFirstFilterByPricePriceTo();
-        var filterQuantity = resultsPage.getFirstFilterByPriceExpectedQuantity();
+        double priceFrom = resultsPage.getFirstFilterByPricePriceFrom();
+        double priceTo = resultsPage.getFirstFilterByPricePriceTo();
+        int filterQuantity = resultsPage.getFirstFilterByPriceExpectedQuantity();
 
         resultsPage.setFirstFilterByPrice();
         resultsPage.waitForResultsQuantity();
 
         // 6. Check results: quantity should be equal to expected (and less than all results),
         // prices should be in range of filter
-        var resultsQuantity = resultsPage.getResultsQuantity();
+        int resultsQuantity = resultsPage.getResultsQuantity();
 
         assertThat(resultsQuantity)
+                .as("Results quantity should be equal to expected by filter")
                 .isLessThan(totalQuantity)
                 .isEqualTo(filterQuantity);
 
-        var prices = resultsPage.getResultsPrices();
+        List<Double> prices = resultsPage.getResultsPrices();
 
         assertThat(prices)
+                .as("Results prices should be in range of filter")
                 .isNotEmpty()
                 .allMatch(d -> d <= priceTo)
                 .allMatch(d -> d >= priceFrom);
-    }
-
-    @AfterClass
-    public void tearDown() {
-        driver.close();
-        driver.quit();
     }
 }

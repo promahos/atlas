@@ -5,6 +5,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,12 +15,16 @@ import static java.util.Locale.US;
 
 public class StaysResultsPage extends BasePage {
 
+    public static final By ADDRESS = By.xpath("//span[@data-testid='address']");
+    public static final By START_DATE = By.xpath("//button[@data-testid='date-display-field-start']");
+    public static final By END_DATE = By.xpath("//button[@data-testid='date-display-field-end']");
+
     public StaysResultsPage(WebDriver driver) {
         super(driver);
     }
 
     public List<String> getAddresses() {
-        var addresses = driver.findElements(By.xpath("//span[@data-testid='address']"));
+        List<WebElement> addresses = driver.findElements(ADDRESS);
 
         if (addresses.size() == 0) {
             return new ArrayList<>();
@@ -32,16 +37,18 @@ public class StaysResultsPage extends BasePage {
     }
 
     public LocalDate getStartDate() {
-        var startDate = driver.findElement(By.xpath("//button[@data-testid='date-display-field-start']"));
-        String date = startDate.getText().split("\n")[1];
-        var formatter = ofPattern("EEEE d MMMM yyyy", US);
-        return LocalDate.parse(date, formatter);
+        return getDate(START_DATE);
     }
 
     public LocalDate getEndDate() {
-        var endDate = driver.findElement(By.xpath("//button[@data-testid='date-display-field-end']"));
-        String date = endDate.getText().split("\n")[1];
-        var formatter = ofPattern("EEEE d MMMM yyyy", US);
+        return getDate(END_DATE);
+    }
+
+    private LocalDate getDate(By dateBy) {
+        WebElement startDateElement = driver.findElement(dateBy);
+        String date = startDateElement.getText().split("\n")[1];
+        DateTimeFormatter formatter = ofPattern("EEEE d MMMM yyyy", US);
+
         return LocalDate.parse(date, formatter);
     }
 }
