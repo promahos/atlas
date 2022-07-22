@@ -1,4 +1,5 @@
 import io.github.bonigarcia.wdm.managers.ChromeDriverManager;
+import org.assertj.core.api.SoftAssertions;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.ITestContext;
@@ -87,21 +88,24 @@ public class BookingTest {
         // Verify
         // City
         List<String> addresses = resultsPage.getAddresses();
-        assertThat(addresses)
+        SoftAssertions soft = new SoftAssertions();
+        soft.assertThat(addresses)
                 .as("All addresses should contain chosen city")
                 .isNotEmpty()
                 .allMatch(e -> e.contains(city));
 
         // Dates
         LocalDate resultsStartDate = resultsPage.getStartDate();
-        assertThat(resultsStartDate)
+        soft.assertThat(resultsStartDate)
                 .as("Start date on results page should be equal to chosen value")
                 .isEqualTo(startDate);
 
         LocalDate resultsEndDate = resultsPage.getEndDate();
-        assertThat(resultsEndDate)
+        soft.assertThat(resultsEndDate)
                 .as("End date on results page should be equal to chosen value")
                 .isEqualTo(endDate);
+
+        soft.assertAll();
     }
 
     @Test
@@ -137,17 +141,20 @@ public class BookingTest {
         // prices should be in range of filter
         int resultsQuantity = resultsPage.getResultsQuantity();
 
-        assertThat(resultsQuantity)
+        SoftAssertions soft = new SoftAssertions();
+        soft.assertThat(resultsQuantity)
                 .as("Results quantity should be equal to expected by filter")
                 .isLessThan(totalQuantity)
                 .isEqualTo(filterQuantity);
 
         List<Double> prices = resultsPage.getResultsPrices();
 
-        assertThat(prices)
+        soft.assertThat(prices)
                 .as("Results prices should be in range of filter")
                 .isNotEmpty()
                 .allMatch(d -> d <= priceTo)
                 .allMatch(d -> d >= priceFrom);
+
+        soft.assertAll();
     }
 }
