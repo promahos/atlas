@@ -1,6 +1,6 @@
 # Atlas test task
 
-This is a test task for test automation with following requirements
+This is a test task for test automation with the following requirements
 1. Automation tool: Selenium WebDriver
 2. Language: Java
 4. Used pattern: Page Object
@@ -10,7 +10,7 @@ Test-cases to implement:
 - Stays search:
 1) Open website https://www.booking.com
 2) Choose city "New York"
-3) Choose dates : December 1, 2022 - December 30, 2022
+3) Choose dates: December 1, 2022 - December 30, 2022
 4) Search
 5) Verify, that in search results (first page)
    - all cities - "New York"
@@ -18,15 +18,25 @@ Test-cases to implement:
 
 - Attractions filter by  price:
 1) Open website https://www.booking.com
-2) Go to attractions page
+2) Go to the attractions page
 3) Choose city "New York"
 4) Search
 5) Set filter by price (first filter value)
 6) Verify, that in search results (first page)
-    - all prices are in range of filter
-    - results quantity is equal to expected by  filter
+   - all prices are in the range of the filter
+   - results quantity is equal to expected by the filter
 
 - Optional task:
-   Using Java Reflection (or any other method) count quantity of test methods in project (with @Test annotation).
-   Save their names as a list with "," delimiter to text file (.txt).
+  Using Java Reflection (or any other method) count the quantity of test methods in the project (with @Test annotation).
+  Save their names as a list with "," delimiter to a text file (.txt).
 
+# Important notes
+
+Optional task is implemented in three different ways, as it's not clear from the task, what we need these methods' names for.
+All three options write to the project directory 'results', but in different files.
+
+- As a separate test. Implemented as a separate test class, needs direct naming of test classes to find methods in.
+  Can be executed as any other test (with mvn or from IDE). Writes to file "testMethodsNamesAsTest.txt" as a result.
+- As a separate (not test) class. Requires org.reflections dependency, gets all test classes from project system folders.
+  Can be executed from IDE (class TestCounter, method main). Writes to file "testMethodsNamesAll.txt" as a result.
+- As a part of test execution. Uses TestNG context, allows getting test methods that are going to be executed. Writes to file "testMethodsNamesBeforeExecution.txt".
