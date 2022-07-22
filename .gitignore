@@ -2,9 +2,8 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-!results/.gitkeep
 results/*
-# exception to the rule
+!results/*.gitkeep
 
 
 ### IntelliJ IDEA ###
