@@ -70,7 +70,7 @@ public class BookingTest {
     public void verifyStaysSearchResults() {
 
         // 1. Open page https://www.booking.com
-        driver.get("https://www.booking.com");
+        driver.get("https://www.booking.com/index.en-gb.html"); // to be sure about language and date formats
         MainPage mainPage = new MainPage(driver);
 
         // 2. Choose city
@@ -112,7 +112,7 @@ public class BookingTest {
     public void verifyAttractionsFilterByPrice() {
 
         // 1. Open page https://www.booking.com
-        driver.get("https://www.booking.com");
+        driver.get("https://www.booking.com/index.en-gb.html"); // to be sure about language and date formats
         MainPage mainPage = new MainPage(driver);
 
         // 2. Go to attractions page
